@@ -10,9 +10,22 @@
 		26317E1D2D03D0F4004EAA1A /* VideoConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		267F22262D099A9D0078A3FE /* Exceptions for "VideoConverter" folder in "VideoConverter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 26317E1C2D03D0F4004EAA1A /* VideoConverter */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		26317E1F2D03D0F4004EAA1A /* VideoConverter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				267F22262D099A9D0078A3FE /* Exceptions for "VideoConverter" folder in "VideoConverter" target */,
+			);
 			path = VideoConverter;
 			sourceTree = "<group>";
 		};
@@ -255,6 +268,8 @@
 				DEVELOPMENT_TEAM = YW6C9F9V96;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VideoConverter/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "For accessing Videos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +299,8 @@
 				DEVELOPMENT_TEAM = YW6C9F9V96;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VideoConverter/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "For accessing Videos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
