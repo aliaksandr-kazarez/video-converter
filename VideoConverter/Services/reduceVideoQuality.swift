@@ -42,6 +42,7 @@ func reduceVideoQuality(of asset: AVURLAsset, quality: String) async throws -> U
     }
 
     do {
+        exportSession.shouldOptimizeForNetworkUse = true
         try await exportSession.export(to: outputURL, as: .mp4)
     } catch {
         throw NSError(
