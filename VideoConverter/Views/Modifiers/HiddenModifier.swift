@@ -24,10 +24,3 @@ extension View {
         self.modifier(HiddenModifier(isHidden: isHidden))
     }
 }
-
-
-//extension View {
-//    func hidden(_ shouldHide: Bool) -> some View {
-//        opacity(shouldHide ? 0 : 1)
-//    }
-//}

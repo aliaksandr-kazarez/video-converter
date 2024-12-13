@@ -5,76 +5,88 @@
 //  Created by Kazarez, Alex on 12/12/24.
 //
 
-import Foundation
 import AVFoundation
+import Foundation
 
 struct Resolution {
-    let width: Int
-    let height: Int
+    let width: Double
+    let height: Double
 }
 
 struct AssetParameters {
     let resolution: Resolution
-    let fps: Double
-    let bitrate: Int
+    let fps: Float
+    let bitrate: Float
     let codec: AVVideoCodecType
     let fileSize: Int
     let duration: CMTime
 }
 
 extension AVURLAsset {
-    /// Returns the `Quality` of the video asset, or `nil` if no video track is available.
-    var quality: AssetParameters? {
-        guard let videoTrack = self.tracks(withMediaType: .video).first else {
-            return nil // No video track available
+    func parameters() async -> AssetParameters? {
+        // Load video tracks
+        guard let videoTrack = try? await self.loadTracks(withMediaType: .video).first else {
+            return nil  // No video track available
         }
-        
-        // Extract resolution
-        let size = Resolution(width: Int(videoTrack.naturalSize.width), height: Int(videoTrack.naturalSize.height))
-        
-        // Extract FPS
-        let fps = videoTrack.nominalFrameRate
-        
-        // Extract bitrate (estimatedDataRate is in bits per second)
-        let bitrate = Int(videoTrack.estimatedDataRate)
-        
-        // Extract codec type (using format descriptions)
-        let codecType: AVVideoCodecType
-        if let formatDescriptions = videoTrack.formatDescriptions as? [CMFormatDescription],
-           let formatDescription = formatDescriptions.first,
-           let codec = CMFormatDescriptionGetMediaSubType(formatDescription).codecType {
-            codecType = codec
-        } else {
-            codecType = .h264 // Default to H.264 if codec can't be determined
-        }
-        
-        let fileSize: Int
+
         do {
-            let resourceValues = try self.url.resourceValues(forKeys: [.fileSizeKey])
-            fileSize = resourceValues.fileSize ?? 0
+            // Load track properties asynchronously
+            let (naturalSize, nominalFrameRate, estimatedDataRate, formatDescriptions) = try await videoTrack.load(
+                .naturalSize,
+                .nominalFrameRate,
+                .estimatedDataRate,
+                .formatDescriptions
+            )
+            //            let preferredTransform = try await videoTrack.load(.preferredTransform)
+
+            return AssetParameters(
+                resolution: naturalSize.resolution,
+                fps: nominalFrameRate,
+                bitrate: estimatedDataRate,
+                codec: formatDescriptions.videoCodecType ?? .h264,
+                fileSize: self.fileSize,
+                duration: try await self.load(.duration)
+            )
         } catch {
-            fileSize = 0 // Default to 0 if file size can't be determined
+            print("Failed to load video parameters: \(error)")
+            return nil
         }
-        
-        return AssetParameters(
-            resolution: size,
-            fps: Double(fps),
-            bitrate: bitrate,
-            codec: codecType,
-            fileSize: fileSize,
-            duration: self.duration
-        )
     }
 }
 
-fileprivate extension FourCharCode {
+extension CGSize {
+    var resolution: Resolution {
+        return Resolution(width: width, height: height)
+    }
+}
+
+extension [CMFormatDescription] {
+    var videoCodecType: AVVideoCodecType? {
+        guard let formatDescription = self.first else { return nil }
+        let mediaSubType = CMFormatDescriptionGetMediaSubType(formatDescription)
+        return mediaSubType.codecType
+    }
+}
+
+extension AVURLAsset {
+    var fileSize: Int {
+        guard let resourceValues = try? self.url.resourceValues(forKeys: [.fileSizeKey]),
+              let fileSize = resourceValues.fileSize
+        else { return 0 }
+        return fileSize
+    }
+}
+
+
+extension FourCharCode {
     /// Converts a FourCharCode into `AVVideoCodecType` if possible
-    var codecType: AVVideoCodecType? {
-        let codecString = String(format: "%c%c%c%c",
-                                 (self >> 24) & 0xff,
-                                 (self >> 16) & 0xff,
-                                 (self >> 8) & 0xff,
-                                 self & 0xff)
+    fileprivate var codecType: AVVideoCodecType {
+        let codecString = String(
+            format: "%c%c%c%c",
+            (self >> 24) & 0xff,
+            (self >> 16) & 0xff,
+            (self >> 8) & 0xff,
+            self & 0xff)
         return AVVideoCodecType(rawValue: codecString)
     }
 }

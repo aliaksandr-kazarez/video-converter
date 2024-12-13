@@ -21,27 +21,31 @@ extension AVAsset {
 struct AssetView: View {
     let asset: AVURLAsset
     @State var preview: Image?
+    @State var parameters: AssetParameters?
 
     var body: some View {
             VStack {
-                if let quality = asset.quality {
-                    Spacer()
-                    if preview == nil { ProgressView() }
-                    Spacer()
-                    TableView(title: asset.fileName ?? "", data: quality.tableViewData)
-                        .panel(background: .regularMaterial)
-                        .padding()
-                }
+                Spacer()
+                if preview == nil { ProgressView() }
+                Spacer()
+                TableView(title: asset.fileName ?? "", data: parameters?.tableViewData ?? [])
+                    .panel(background: .regularMaterial)
+                    .padding()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
                 preview?.resizable().aspectRatio(contentMode: .fill).ignoresSafeArea()
             )
             .background(Color.gray)
         .task {
-//            try? await Task.sleep(for: .seconds(2))
-            let preview = await asset.toImage()
+            async let tasks = (asset.toImage(), asset.parameters())
+            let (preview, parameters) = await tasks
+            
+            try? await Task.sleep(for: .seconds(3))
+            
             withAnimation {
                 self.preview = preview
+                self.parameters = parameters
             }
         }
     }
