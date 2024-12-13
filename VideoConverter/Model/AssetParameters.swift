@@ -19,6 +19,7 @@ struct AssetParameters {
     let bitrate: Int
     let codec: AVVideoCodecType
     let fileSize: Int
+    let duration: CMTime
 }
 
 extension AVURLAsset {
@@ -60,7 +61,8 @@ extension AVURLAsset {
             fps: Double(fps),
             bitrate: bitrate,
             codec: codecType,
-            fileSize: fileSize
+            fileSize: fileSize,
+            duration: self.duration
         )
     }
 }

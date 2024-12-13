@@ -43,14 +43,17 @@ struct TableView: View {
 }
 
 #Preview {
-    TableView(title: "Title", data: [("Key", "Value"), ("Key", "Value"), ("Key", "Value")])
-
+    let data = [("Resolution", "1980X600"), ("Key", "Value"), ("Key", "Value")]
+    TableView(title: "Title", data: data)
+        .panel(background: .ultraThinMaterial)
+        .padding(5)
+        .background(Color.secondary)
 
     HStack {
-        TableView(title: "Title", data: [("Key", "Value"), ("Key", "Value"), ("Key", "Value")])
-        TableView(title: "Title", data: [("Key", "Value"), ("Key", "Value"), ("Key", "Value")])
-        TableView(title: "Title", data: [("Key", "Value"), ("Key", "Value"), ("Key", "Value")])
+        TableView(title: "Title", data: data)
+        TableView(title: "Title", data: data)
+        TableView(title: "Title", data: data)
     }
     Spacer()
-    TableView(title: "Title", data: [("Key", "Value"), ("Key", "Value"), ("Key", "Value")])
+    TableView(title: "Title", data: data)
 }

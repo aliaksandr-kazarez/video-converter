@@ -38,8 +38,11 @@ struct AssetView: View {
             )
             .background(Color.gray)
         .task {
-            try? await Task.sleep(for: .seconds(2))
-            preview = await asset.toImage()
+//            try? await Task.sleep(for: .seconds(2))
+            let preview = await asset.toImage()
+            withAnimation {
+                self.preview = preview
+            }
         }
     }
 }
@@ -52,7 +55,22 @@ extension AssetParameters {
             ("Bitrate", bitrateString),
             ("Codec", codecString),
             ("Size", fileSizeString),
+            ("Duration", durationString)
         ]
+    }
+    fileprivate var durationString: String {
+        let totalSeconds = Int(CMTimeGetSeconds(self.duration))
+        guard totalSeconds >= 0 else { return "00:00" }
+        
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+        
+        if hours > 0 {
+            return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, seconds)
+        }
     }
     fileprivate var fileSizeString: String {
         let byteFormatter = ByteCountFormatter()

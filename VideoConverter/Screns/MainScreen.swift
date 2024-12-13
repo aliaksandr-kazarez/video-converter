@@ -17,10 +17,10 @@ struct ExportableMovie: Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .video) { movie in
-            guard let exportingURL = try? await reduceVideoQuality(of: movie.asset, quality: movie.preset) else {
+            guard let compressedVideoURL = try? await compress(asset: movie.asset) else {
                 throw NSError(domain: "ExportableMovie", code: -1)
             }
-            return SentTransferredFile(exportingURL)
+            return SentTransferredFile(compressedVideoURL)
         }
     }
 }
