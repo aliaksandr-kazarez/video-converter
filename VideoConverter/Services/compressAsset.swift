@@ -73,8 +73,6 @@ func compress(asset: AVURLAsset) async throws -> URL {
             }
         }
     }
-    
-    
 }
 
 // Example Usage

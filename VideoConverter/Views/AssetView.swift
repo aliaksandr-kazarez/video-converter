@@ -9,15 +9,6 @@ import AVFoundation
 import AVKit
 import SwiftUI
 
-extension AVAsset {
-    fileprivate var fileName: String? {
-        guard let urlAsset = self as? AVURLAsset else {
-            return nil
-        }
-        return urlAsset.url.lastPathComponent
-    }
-}
-
 struct AssetView: View {
     let asset: AVURLAsset
     @State var preview: Image?
@@ -28,7 +19,7 @@ struct AssetView: View {
                 Spacer()
                 if preview == nil { ProgressView() }
                 Spacer()
-                TableView(title: asset.fileName ?? "", data: parameters?.tableViewData ?? [])
+                TableView(title: asset.fileName, data: parameters?.tableViewData ?? [])
                     .panel(background: .regularMaterial)
                     .padding()
             }
@@ -41,14 +32,76 @@ struct AssetView: View {
             async let tasks = (asset.toImage(), asset.parameters())
             let (preview, parameters) = await tasks
             
-            try? await Task.sleep(for: .seconds(3))
-            
             withAnimation {
                 self.preview = preview
                 self.parameters = parameters
             }
         }
     }
+}
+
+extension VideoQuality {
+    fileprivate var tableViewData: [(String, String)] {
+        [
+            ("Resolution", resolutionString),
+            ("Frame Rate", frameRateString),
+            ("Bitrate", bitrateString),
+//            ("Codec", codecString),
+//            ("Size", fileSizeString),
+//            ("Duration", durationString)
+        ]
+    }
+//    fileprivate var durationString: String {
+//        let totalSeconds = Int(CMTimeGetSeconds(self.duration))
+//        guard totalSeconds >= 0 else { return "00:00" }
+//        
+//        let hours = totalSeconds / 3600
+//        let minutes = (totalSeconds % 3600) / 60
+//        let seconds = totalSeconds % 60
+//        
+//        if hours > 0 {
+//            return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+//        } else {
+//            return String(format: "%02d:%02d", minutes, seconds)
+//        }
+//    }
+//    fileprivate var fileSizeString: String {
+//        let byteFormatter = ByteCountFormatter()
+//        byteFormatter.allowedUnits = [.useBytes, .useKB, .useMB, .useGB]
+//        byteFormatter.countStyle = .file
+//        return byteFormatter.string(fromByteCount: Int64(fileSize))
+//    }
+    fileprivate var resolutionString: String {
+        "\(resolution.width)x\(resolution.height)"
+    }
+    fileprivate var frameRateString: String {
+        "\(String(format: "%.2f", frameRate)) FPS"
+    }
+    fileprivate var bitrateString: String {
+        if bitrate >= 1_000_000 {
+            return "\(bitrate / 1_000_000) Mbps"
+        } else if bitrate >= 1_000 {
+            return "\(bitrate / 1_000) Kbps"
+        } else {
+            return "\(bitrate) bps"
+        }
+    }
+//    fileprivate var codecString: String {
+//        switch codec {
+//        case .h264:
+//            return "H.264"
+//        case .hevc:
+//            return "HEVC (H.265)"
+//        case .jpeg:
+//            return "JPEG"
+//        case .proRes4444:
+//            return "ProRes 4444"
+//        case .proRes422:
+//            return "ProRes 422"
+//        default:
+//            return codec.rawValue
+//        }
+//    }
 }
 
 extension AssetParameters {
@@ -86,7 +139,7 @@ extension AssetParameters {
         "\(resolution.width)x\(resolution.height)"
     }
     fileprivate var frameRateString: String {
-        "\(String(format: "%.2f", fps)) FPS"
+        "\(String(format: "%.2f", frameRate)) FPS"
     }
     fileprivate var bitrateString: String {
         if bitrate >= 1_000_000 {

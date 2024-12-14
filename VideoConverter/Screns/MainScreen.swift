@@ -30,7 +30,6 @@ struct MainScreen: View {
     @State private var preview: Image?
     @State private var asset: AVURLAsset?
     @State private var isLoading: Bool = false
-    @State private var properties: VideoProperties = .empty
     @State private var presetForExport: String?
     @State private var supportedPresets: [String] = []
     @State private var exporting = false
@@ -103,7 +102,6 @@ struct MainScreen: View {
         .onChange(of: selectedItem) {
             Task {
                 isLoading = true
-                self.properties = .empty
                 self.asset = nil
                 self.preview = nil
 
@@ -116,7 +114,6 @@ struct MainScreen: View {
                 else { return }
 
                 self.preview = await asset.toImage()
-                self.properties = await asset.getVideoProperties()
                 self.supportedPresets = await allSupportedPresets(for: asset, outputFileType: .mp4)
                 withAnimation(.easeOut) {
                     self.asset = asset
