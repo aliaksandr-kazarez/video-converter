@@ -7,13 +7,20 @@
 
 import AVFoundation
 
-func compress(asset: AVURLAsset) async throws -> URL {
+extension VideoQuality {
+    func withAspectRatio(_ aspectRatio: Double) -> VideoQuality {
+        let resolution = Resolution(height: self.resolution.height, aspectRatio: aspectRatio)
+        return VideoQuality(resolution: resolution, frameRate: self.frameRate, bitrate: self.bitrate)
+    }
+}
+
+func compress(asset: AVURLAsset, with quality: VideoQuality) async throws -> URL {
     let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("compressed.mp4")
     if FileManager.default.fileExists(atPath: outputURL.path) {
         try FileManager.default.removeItem(at: outputURL)
     }
     
-    guard let videoTrack = asset.tracks(withMediaType: .video).first else {
+    guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first else {
         throw NSError(domain: "No video track found", code: -1, userInfo: nil)
     }
     
@@ -34,17 +41,11 @@ func compress(asset: AVURLAsset) async throws -> URL {
         throw NSError(domain: "Failed to create AVAssetWriter", code: -1, userInfo: nil)
     }
     
-    let videoOutputSettings: [String: Any] = [
-        AVVideoCodecKey: AVVideoCodecType.h264,
-        AVVideoWidthKey: Int(videoTrack.naturalSize.width),
-        AVVideoHeightKey: Int(videoTrack.naturalSize.height),
-        AVVideoCompressionPropertiesKey: [
-            AVVideoAverageBitRateKey: 5_000_000, // 5 Mbps
-        ]
-    ]
+    let naturalSize = videoTrack.naturalSize.applying(videoTrack.preferredTransform)
+    let width = abs(naturalSize.width)
+    let height = abs(naturalSize.height)
     
-    let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoOutputSettings)
-    writerInput.expectsMediaDataInRealTime = false
+    let writerInput = AVAssetWriterInput.from(quality: quality.withAspectRatio(width/height))
     assetWriter.add(writerInput)
     
     // Start reading and writing
@@ -74,16 +75,3 @@ func compress(asset: AVURLAsset) async throws -> URL {
         }
     }
 }
-
-// Example Usage
-//let inputURL = URL(fileURLWithPath: "/path/to/input/video.mp4")
-//let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("converted_video.mp4")
-//
-//compress(asset: inputURL, outputURL: outputURL) { result in
-//    switch result {
-//    case .success(let url):
-//        print("Video converted successfully: \(url)")
-//    case .failure(let error):
-//        print("Failed to convert video: \(error)")
-//    }
-//}

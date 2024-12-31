@@ -12,12 +12,12 @@ import PhotosUI
 import SwiftUI
 
 struct ExportableMovie: Transferable {
-    let preset: String
     let asset: AVURLAsset
+    let quality: VideoQuality
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .video) { movie in
-            guard let compressedVideoURL = try? await compress(asset: movie.asset) else {
+            guard let compressedVideoURL = try? await compress(asset: movie.asset, with: movie.quality) else {
                 throw NSError(domain: "ExportableMovie", code: -1)
             }
             return SentTransferredFile(compressedVideoURL)
@@ -30,9 +30,10 @@ struct MainScreen: View {
     @State private var preview: Image?
     @State private var asset: AVURLAsset?
     @State private var isLoading: Bool = false
-    @State private var presetForExport: String?
-    @State private var supportedPresets: [String] = []
+    @State private var selectedQuality: VideoQuality = .medium
+    @State private var qualitites: [(String, VideoQuality)] = [("Low", .low), ("Medium", .medium), ("High", .high)]
     @State private var exporting = false
+    @State private var estimatedFileSize: Double = 0
 
     @Namespace private var animationNamespace
     
@@ -52,22 +53,20 @@ struct MainScreen: View {
             VStack {
                 if let asset {
                     AssetView(asset: asset)
-                    Picker("Choose Preset", selection: $presetForExport) {
-                        Text("Noting Selected").tag(nil as String?)
-                        ForEach(supportedPresets, id: \.self) { preset in
-                            Text(preset).tag(preset)
+                    Picker("Choose Preset", selection: $selectedQuality) {
+                        ForEach(qualitites, id: \.0) { (name, qualtiy) in
+                            Text(name).tag(qualtiy)
                         }
                     }
-                    if let presetForExport {
-                        ShareLink("Convert and Share", items: [ExportableMovie(preset: presetForExport, asset: asset)])
-                        {
-                            movie in
-                            SharePreview(
-                                "Export",
-                                image: Image(systemName: "figure.wave.circle.fill"),
-                                icon: Image(systemName: "figure.walk.diamond")
-                            )
-                        }
+                    Label("New Size: \(fileSizeString(size: estimatedFileSize))", systemImage: "file.badge.plus")
+                    ShareLink("Convert and Share", items: [ExportableMovie(asset: asset, quality: selectedQuality)])
+                    {
+                        movie in
+                        SharePreview(
+                            "Export",
+                            image: Image(systemName: "figure.wave.circle.fill"),
+                            icon: Image(systemName: "figure.walk.diamond")
+                        )
                     }
                 } else if isLoading {
                     ProgressView()
@@ -99,28 +98,37 @@ struct MainScreen: View {
                 }
             }
         }
+        .onChange(of: selectedQuality) {
+            guard let duration = asset?.duration else { return }
+            estimatedFileSize = estimateFileSize(videoQuality: selectedQuality, duration: duration);
+            
+        }
         .onChange(of: selectedItem) {
             Task {
                 isLoading = true
                 self.asset = nil
-                self.preview = nil
 
                 defer {
                     isLoading = false
                 }
 
                 guard let selectedItem,
-                    let asset = try await selectedItem.loadTransferable(type: TransferableAVURLAsset.self)?.asset
+                    let asset = try? await selectedItem.loadTransferable(type: TransferableAVURLAsset.self)?.asset
                 else { return }
-
-                self.preview = await asset.toImage()
-                self.supportedPresets = await allSupportedPresets(for: asset, outputFileType: .mp4)
+                
                 withAnimation(.easeOut) {
                     self.asset = asset
                 }
             }
         }
     }
+}
+
+func fileSizeString(size: Double) -> String {
+    let byteFormatter = ByteCountFormatter()
+    byteFormatter.allowedUnits = [.useBytes, .useKB, .useMB, .useGB]
+    byteFormatter.countStyle = .file
+    return byteFormatter.string(fromByteCount: Int64(size))
 }
 
 #Preview {

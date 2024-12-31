@@ -19,7 +19,7 @@ struct AssetParameters {
     let duration: CMTime
 }
 
-struct VideoQuality {
+struct VideoQuality: Hashable {
     let resolution: Resolution
     let frameRate: Float
     let bitrate: Float
@@ -38,9 +38,8 @@ extension VideoQuality {
         {
             let resolutionFactor =
                 (resolution.width * resolution.height) / (baseResolution.width * baseResolution.height)
-            let frameRateFactor = Double(frameRate) / Double(baseFrameRate)
-            return self.rawValue / Float((resolutionFactor * frameRateFactor))
-
+            let frameRateFactor = frameRate / baseFrameRate
+            return self.rawValue * Float(resolutionFactor) * Float(frameRateFactor)
         }
     }
 
@@ -57,6 +56,26 @@ extension VideoQuality {
     static let high = VideoQuality(resolution: .p1080, frameRate: 60, quality: .high)
 }
 
+extension AVAssetWriterInput {
+    static func from(quality: VideoQuality, with codec: AVVideoCodecType = .h264) -> AVAssetWriterInput {
+        print("Converting Video Quality: \(quality)")
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: codec,
+            AVVideoWidthKey: Int(quality.resolution.width),
+            AVVideoHeightKey: Int(quality.resolution.height),
+            AVVideoCompressionPropertiesKey: [
+                AVVideoAverageBitRateKey: Int(quality.bitrate),
+                AVVideoExpectedSourceFrameRateKey: Int(quality.frameRate),
+                AVVideoMaxKeyFrameIntervalKey: Int(quality.frameRate),
+            ],
+        ]
+
+        let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        writerInput.expectsMediaDataInRealTime = false
+        return writerInput
+    }
+}
+
 extension AVURLAsset {
     func videoQualtiy() async -> VideoQuality? {
         guard let videoTrack = try? await self.loadTracks(withMediaType: .video).first else {
@@ -64,17 +83,19 @@ extension AVURLAsset {
         }
 
         do {
-            let (naturalSize, nominalFrameRate, estimatedDataRate) = try await videoTrack.load(
+            let (naturalSize, nominalFrameRate, estimatedDataRate, preferredTransform) = try await videoTrack.load(
                 .naturalSize,
                 .nominalFrameRate,
-                .estimatedDataRate
+                .estimatedDataRate,
+                .preferredTransform
             )
+            
+            print("Asset Size:", naturalSize, naturalSize.applying(preferredTransform))
 
             return VideoQuality(
-                resolution: naturalSize.resolution,
+                resolution: naturalSize.applying(preferredTransform).resolution,
                 frameRate: nominalFrameRate,
                 bitrate: estimatedDataRate
-
             )
         } catch {
             print("Failed to load video parameters: \(error)")
@@ -91,16 +112,16 @@ extension AVURLAsset {
 
         do {
             // Load track properties asynchronously
-            let (naturalSize, nominalFrameRate, estimatedDataRate, formatDescriptions) = try await videoTrack.load(
+            let (naturalSize, nominalFrameRate, estimatedDataRate, formatDescriptions, preferredTransform) = try await videoTrack.load(
                 .naturalSize,
                 .nominalFrameRate,
                 .estimatedDataRate,
-                .formatDescriptions
+                .formatDescriptions,
+                .preferredTransform
             )
-            //            let preferredTransform = try await videoTrack.load(.preferredTransform)
 
             return AssetParameters(
-                resolution: naturalSize.resolution,
+                resolution: naturalSize.applying(preferredTransform).resolution,
                 frameRate: nominalFrameRate,
                 bitrate: estimatedDataRate,
                 codec: formatDescriptions.videoCodecType ?? .h264,

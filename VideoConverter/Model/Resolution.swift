@@ -6,9 +6,32 @@
 //
 
 
-struct Resolution {
-    let width: Double
+
+struct Resolution: Hashable {
+    enum ResolutionName: Double {
+        case p360 = 360
+        case p720 = 720
+        case p1080 = 1080
+        case p1440 = 1440
+        case p4K = 2160
+    }
+    
     let height: Double
+    let aspectRatio: Double
+    var width: Double { height * aspectRatio }
+    
+    init(height: Double, aspectRatio: Double) {
+        self.height = height
+        self.aspectRatio = aspectRatio
+    }
+    
+    init(width: Double, height: Double) {
+        self.init(height: height, aspectRatio: width / height)
+    }
+    
+    init (_ name: ResolutionName, aspectRatio: Double = 16/9) {
+        self.init(height: name.rawValue, aspectRatio: aspectRatio)
+    }
 }
 
 extension Resolution {
