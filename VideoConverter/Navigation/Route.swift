@@ -12,5 +12,6 @@ enum Route {
     case home
     case videoPicker
     case downloadPickedVideo(PhotosPickerItem)
+    case selectQualityScreen(AVURLAsset)
     case videoProcessing
 }

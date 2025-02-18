@@ -10,7 +10,6 @@ import PhotosUI
 
 struct VideoPickerScreen: View {
     @EnvironmentObject var router: Router
-
     @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {
@@ -25,6 +24,8 @@ struct VideoPickerScreen: View {
 //            .navigationTitle("Select Video")
     }
 }
+
+
 
 #Preview {
     VideoPickerScreen()

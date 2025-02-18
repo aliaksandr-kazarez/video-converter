@@ -21,6 +21,8 @@ struct NavigatorView: View {
                 TransferFileView(itemToTransfer: selectedItem)
             case .videoProcessing:
                 VideoProcessingScreen()
+            case .selectQualityScreen(let asset):
+                SelectQualityScreen(asset: asset)
             }
         }
     }
