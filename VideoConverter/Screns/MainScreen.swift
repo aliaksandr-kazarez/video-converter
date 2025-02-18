@@ -49,7 +49,7 @@ struct MainScreen: View {
     }
 
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack {
                 if let asset {
                     AssetView(asset: asset)
@@ -83,21 +83,21 @@ struct MainScreen: View {
                         isSource: !isButtonInToolbar
                     )
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .bottomBar) {
-                    photosPicker
-                        .buttonStyle(.borderless)
-                        .hidden(!isButtonInToolbar)
-                        .matchedGeometryEffect(
-                            id: "button",
-                            in: animationNamespace,
-                            properties: .position,
-                            isSource: isButtonInToolbar
-                        )
-                    Spacer()
-                }
-            }
-        }
+//            .toolbar {
+//                ToolbarItemGroup(placement: .bottomBar) {
+//                    photosPicker
+//                        .buttonStyle(.borderless)
+//                        .hidden(!isButtonInToolbar)
+//                        .matchedGeometryEffect(
+//                            id: "button",
+//                            in: animationNamespace,
+//                            properties: .position,
+//                            isSource: isButtonInToolbar
+//                        )
+//                    Spacer()
+//                }
+//            }
+//        }
         .onChange(of: selectedQuality) {
             guard let duration = asset?.duration else { return }
             estimatedFileSize = estimateFileSize(videoQuality: selectedQuality, duration: duration);
@@ -124,12 +124,12 @@ struct MainScreen: View {
     }
 }
 
-func fileSizeString(size: Double) -> String {
-    let byteFormatter = ByteCountFormatter()
-    byteFormatter.allowedUnits = [.useBytes, .useKB, .useMB, .useGB]
-    byteFormatter.countStyle = .file
-    return byteFormatter.string(fromByteCount: Int64(size))
-}
+//func fileSizeString(size: Double) -> String {
+//    let byteFormatter = ByteCountFormatter()
+//    byteFormatter.allowedUnits = [.useBytes, .useKB, .useMB, .useGB]
+//    byteFormatter.countStyle = .file
+//    return byteFormatter.string(fromByteCount: Int64(size))
+//}
 
 #Preview {
     MainScreen()

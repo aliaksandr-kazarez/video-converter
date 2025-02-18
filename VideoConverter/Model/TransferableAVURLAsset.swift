@@ -15,7 +15,7 @@ struct TransferableAVURLAsset: Transferable {
         FileRepresentation(contentType: .movie) { asset in
             SentTransferredFile(asset.asset.url)
         } importing: { received in
-            let copy = URL.documentsDirectory.appending(path: "movie.mp4")
+            let copy = URL.documentsDirectory.appending(path: received.file.lastPathComponent)
             
             if FileManager.default.fileExists(atPath: copy.path()) {
                 try FileManager.default.removeItem(at: copy)
