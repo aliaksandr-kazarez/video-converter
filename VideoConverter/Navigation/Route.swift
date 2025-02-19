@@ -9,9 +9,10 @@ import SwiftUI
 import PhotosUI
 
 enum Route {
-    case home
-    case videoPicker
-    case downloadPickedVideo(PhotosPickerItem)
-    case selectQualityScreen(AVURLAsset)
-    case videoProcessing
+    case videoPickerScreen
+    // TODO: getRid of photosPickerItem in favor of some abstraction
+    case transferScreen(selectedVideo: PhotosPickerItem)
+    case exportQualityScreen(asset: AVURLAsset)
+    case exportVideoScreen(assetToExport: AVURLAsset, selectedExportQuality: VideoQuality)
+    case finishedExportingVideoScreen(exportedVideoAsset: AVURLAsset)
 }

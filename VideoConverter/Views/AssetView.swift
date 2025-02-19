@@ -34,7 +34,7 @@ struct AssetView: View {
             async let tasks = (asset.toImage(), asset.parameters())
             let (preview, parameters) = await tasks
             
-            try? await Task.sleep(for: .seconds(5))
+//            try? await Task.sleep(for: .seconds(5))
             
             withAnimation {
 //                self.preview = preview

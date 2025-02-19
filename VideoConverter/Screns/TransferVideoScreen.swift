@@ -8,8 +8,8 @@
 import SwiftUI
 import PhotosUI
 
-public struct TransferFileView: View {
-    public let itemToTransfer: PhotosPickerItem
+public struct TransferVideoScreen: View {
+    let videoPickerItem: PhotosPickerItem
     
     @State private var asset: AVURLAsset?
     @State private var isLoading: Bool = false
@@ -19,7 +19,7 @@ public struct TransferFileView: View {
 
     public var body: some View {
         VStack {
-            ProgressView()
+            ProgressView("Trasferring video...")
         }
         .onAppear {
             Task {
@@ -30,12 +30,17 @@ public struct TransferFileView: View {
                     isLoading = false
                 }
 
-                guard let asset = try? await itemToTransfer.loadTransferable(type: TransferableAVURLAsset.self)?.asset else { return }
+                guard let asset = try? await videoPickerItem.loadTransferable(type: TransferableAVURLAsset.self)?.asset else { return }
                 
                 withAnimation(.easeOut) {
-                    router.navigate(to: .selectQualityScreen(asset))
+                    router.navigate(to: .exportQualityScreen(asset: asset))
                 }
             }
         }
     }
+}
+
+#Preview {
+    TransferVideoScreen(videoPickerItem: .init(itemIdentifier: .init()))
+        .environmentObject(Router())
 }

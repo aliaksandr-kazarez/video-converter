@@ -24,17 +24,8 @@ public struct SelectQualityScreen: View {
                 }
             }
             Label("New Size: \(fileSizeString(size: estimatedFileSize))", systemImage: "file.badge.plus")
-            ShareLink("Convert and Share", items: [ExportableMovie(asset: asset, quality: selectedQuality)]) {
-                movie in
-                SharePreview(
-                    "Export",
-                    image: Image(systemName: "figure.wave.circle.fill"),
-                    icon: Image(systemName: "figure.walk.diamond")
-                )
-            }
-            // navigate back... should probably be on top
-            Button("Import Video") {
-                router.navigate(to: .videoPicker)
+            Button("Compress") {
+                router.navigate(to: .exportVideoScreen(assetToExport: asset, selectedExportQuality: selectedQuality))
             }
         }
         .onChange(of: selectedQuality) {

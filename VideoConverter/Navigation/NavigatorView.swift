@@ -13,16 +13,16 @@ struct NavigatorView: View {
     var body: some View {
         NavigationStack {
             switch router.currentRoute {
-            case .home:
-                HomeScreen()
-            case .videoPicker:
+            case .videoPickerScreen:
                 VideoPickerScreen()
-            case .downloadPickedVideo(let selectedItem):
-                TransferFileView(itemToTransfer: selectedItem)
-            case .videoProcessing:
-                VideoProcessingScreen()
-            case .selectQualityScreen(let asset):
+            case .transferScreen(let selectedItem):
+                TransferVideoScreen(videoPickerItem: selectedItem)
+            case .exportQualityScreen(let asset):
                 SelectQualityScreen(asset: asset)
+            case .exportVideoScreen(assetToExport: let assetToExport, selectedExportQuality: let selectedExportQuality):
+                CompressVideoScreen(asset: assetToExport, quality: selectedExportQuality)
+            case .finishedExportingVideoScreen(exportedVideoAsset: let exportedVideoAsset):
+                CompressVideoResultScreen(asset: exportedVideoAsset)
             }
         }
     }
@@ -30,21 +30,9 @@ struct NavigatorView: View {
 
 #Preview {
     NavigatorView()
-        .environmentObject(Router(.videoPicker))
+        .environmentObject(Router(.videoPickerScreen))
 }
 
-
-struct HomeScreen: View {
-    @EnvironmentObject var router: Router
-    
-    var body: some View {
-        Text("Home")
-        Button("Go to Video Picker") {
-            router.navigate(to: .videoPicker)
-        }
-        
-    }
-}
 
 struct VideoProcessingScreen: View {
     var body: some View {

@@ -11,20 +11,6 @@ import Photos
 import PhotosUI
 import SwiftUI
 
-struct ExportableMovie: Transferable {
-    let asset: AVURLAsset
-    let quality: VideoQuality
-
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(exportedContentType: .video) { movie in
-            guard let compressedVideoURL = try? await compress(asset: movie.asset, with: movie.quality) else {
-                throw NSError(domain: "ExportableMovie", code: -1)
-            }
-            return SentTransferredFile(compressedVideoURL)
-        }
-    }
-}
-
 struct MainScreen: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var preview: Image?
@@ -58,16 +44,16 @@ struct MainScreen: View {
                             Text(name).tag(qualtiy)
                         }
                     }
-                    Label("New Size: \(fileSizeString(size: estimatedFileSize))", systemImage: "file.badge.plus")
-                    ShareLink("Convert and Share", items: [ExportableMovie(asset: asset, quality: selectedQuality)])
-                    {
-                        movie in
-                        SharePreview(
-                            "Export",
-                            image: Image(systemName: "figure.wave.circle.fill"),
-                            icon: Image(systemName: "figure.walk.diamond")
-                        )
-                    }
+//                    Label("New Size: \(fileSizeString(size: estimatedFileSize))", systemImage: "file.badge.plus")
+//                    ShareLink("Convert and Share", items: [ExportableMovie(asset: asset, quality: selectedQuality)])
+//                    {
+//                        movie in
+//                        SharePreview(
+//                            "Export",
+//                            image: Image(systemName: "figure.wave.circle.fill"),
+//                            icon: Image(systemName: "figure.walk.diamond")
+//                        )
+//                    }
                 } else if isLoading {
                     ProgressView()
                 } else {

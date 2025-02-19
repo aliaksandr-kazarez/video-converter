@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct VideoConverterApp: App {
-    @StateObject private var router = Router(.videoPicker)
+    @StateObject private var router = Router(.videoPickerScreen)
     
     var body: some Scene {
         WindowGroup {

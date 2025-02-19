@@ -19,7 +19,7 @@ struct VideoPickerScreen: View {
             .onChange(of: selectedItem) {
                 guard let selectedItem else { return }
                 // TODO transfer transferable to application FS for processing
-                router.navigate(to: .downloadPickedVideo(selectedItem))
+                router.navigate(to: .transferScreen(selectedVideo: selectedItem))
             }
 //            .navigationTitle("Select Video")
     }
